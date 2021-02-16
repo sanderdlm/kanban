@@ -35,11 +35,11 @@
       line-height: 1;
     }
 
-    .board {
+    main {
       display: flex;
     }
 
-    .list {
+    section {
       display: flex;
       flex-direction: column;
       height: calc(95vh - 3rem);
@@ -47,7 +47,7 @@
       width: calc(100vw / 5);
     }
 
-    .list header {
+    section header {
       align-items: center;
       border-bottom: solid 1px var(--color-background);
       background: var(--bright-sun);
@@ -56,17 +56,17 @@
       margin-bottom: 1rem;
     }
 
-    .list header h2 {
+    section header h2 {
       font-size: var(--font-size);
       margin-left: auto;
     }
 
-    .list header button {
+    section header button {
       font-size: inherit;
       padding: .25rem .5rem;
     }
 
-    .list + .list {
+    section + section {
       margin-left: 1rem;
     }
 
@@ -238,8 +238,8 @@
 
     window.addEventListener('DOMContentLoaded', () => {
       // Get our elements
-      const lists = document.querySelectorAll(".list");
-      const addButtons = document.querySelectorAll(".new");
+      const lists = document.querySelectorAll("section");
+      const addButtons = document.querySelectorAll("header button");
       const trashcan = document.querySelector('.trashcan');
 
       // Loop the lists and restore their content
@@ -279,21 +279,21 @@
   </script>
 </head>
 <body>
-  <main class="board">
-    <section class="list" id="to-do">
-      <header><button class="new">+</button><h2>To do</h2></header>
+  <main>
+    <section id="to-do">
+      <header><button>+</button><h2>To do</h2></header>
     </section>
-    <section class="list" id="progress">
-      <header><button class="new">+</button><h2>In progress</h2></header>
+    <section id="progress">
+      <header><button>+</button><h2>In progress</h2></header>
     </section>
-    <section class="list" id="review">
-      <header><button class="new">+</button><h2>In review</h2></header>
+    <section id="review">
+      <header><button>+</button><h2>In review</h2></header>
     </section>
-    <section class="list" id="approved">
-      <header><button class="new">+</button><h2>Approved</h2></header>
+    <section id="approved">
+      <header><button>+</button><h2>Approved</h2></header>
     </section>
-    <section class="list" id="done">
-      <header><button class="new">+</button><h2>Done</h2></header>
+    <section id="done">
+      <header><button>+</button><h2>Done</h2></header>
     </section>
   </main>
   <aside class="trashcan"></aside>
