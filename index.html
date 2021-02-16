@@ -75,14 +75,12 @@
       color: var(--color-text);
       outline: solid 1px var(--color-text);
       resize: none;
-      
       font: inherit;
       padding: .5rem;
       line-height: 1.5em;
-     
+      overflow: hidden;
       transition: 100ms;
       margin: 0 .5rem;
-      white-space: pre-wrap;
     }
 
     textarea + textarea {
@@ -106,7 +104,7 @@
       transition: 100ms;
     }
 
-    .trash-open{
+    .trash-open {
       background-color: var(--hot-cinnamon);
     }
   </style>
@@ -210,8 +208,17 @@
         newNote.value = '';
       }
 
+      newNote.addEventListener("click", event => {
+        // Update the textarea height when the input changes
+        newNote.style.height = newNote.scrollHeight + 'px';
+        localStorage.setItem(newNote.id, newNote.value);
+      });
+
       // Add the update & drag event listeners
       newNote.addEventListener("input", event => {
+        // Update the textarea height when the input changes
+        console.log(newNote.scrollHeight);
+        newNote.style.height = newNote.scrollHeight + 'px';
         localStorage.setItem(newNote.id, newNote.value);
       });
 
@@ -219,7 +226,12 @@
 
       // Add the note to the list
       const parentList = document.getElementById(listId);
+
+      // Render it
       parentList.appendChild(newNote);
+
+      // Set the textarea height to the content (has to be after rendering)
+      newNote.style.height = newNote.scrollHeight + 'px';
 
       return newNote.id;
     }
