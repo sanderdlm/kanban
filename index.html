@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Kanban</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      /* Colors */
+      --mine-shaft: #212121;
+      --mercury: #e8e8e8;
+      --bright-sun: #FEDC32;
+      --hot-cinnamon: #DE5825;
+      --concrete: #fafafa;
+
+      --color-text: var(--mine-shaft);
+      --color-background: var(--concrete);
+
+      --breathe: 1rem;
+      --font-size: 1.15rem;
+    }
+
+    body {
+      background: var(--color-background);
+      color: var(--color-text);
+      font-family: -apple-system,BlinkMacSystemFont,Helvetica Neue,Arial,Noto Sans,sans-serif,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Noto Color Emoji;
+      font-size: var(--font-size);
+      padding: var(--breathe);
+      line-height: 1;
+    }
+
+    .board {
+      display: flex;
+    }
+
+    .list {
+      display: flex;
+      flex-direction: column;
+      height: calc(95vh - 3rem);
+      overflow-y: auto;
+      width: calc(100vw / 5);
+    }
+
+    .list header {
+      align-items: center;
+      border-bottom: solid 1px var(--color-background);
+      background: var(--bright-sun);
+      display: flex;
+      padding: .5rem;
+      margin-bottom: 1rem;
+    }
+
+    .list header h2 {
+      font-size: var(--font-size);
+      margin-left: auto;
+    }
+
+    .list header button {
+      font-size: inherit;
+      padding: .25rem .5rem;
+    }
+
+    .list + .list {
+      margin-left: 1rem;
+    }
+
+    textarea {
+      border: none;
+      color: var(--color-text);
+      outline: solid 1px var(--color-text);
+      resize: none;
+      
+      font: inherit;
+      padding: .5rem;
+      line-height: 1.5em;
+     
+      transition: 100ms;
+      margin: 0 .5rem;
+      white-space: pre-wrap;
+    }
+
+    textarea + textarea {
+      margin-top: 1rem;
+    }
+
+    textarea:focus {
+      outline: solid 3px var(--color-text);
+    }
+
+    textarea:hover {
+      box-shadow: 3px 3px 0 #ccc;
+      cursor: pointer;
+    }
+
+    .trashcan {
+      width: 100%;
+      height: 5vh;
+      margin-top: var(--breathe);
+      background-color: var(--mercury);
+      transition: 100ms;
+    }
+
+    .trash-open{
+      background-color: var(--hot-cinnamon);
+    }
+  </style>
+  <script type="text/javascript" defer>
+    /* 
+     * Note drag & drop handlers 
+     */
+    function dragStartHandler(event) {
+      const draggedNote = event.target.id;
+      const parentList = event.target.parentNode.id;
+
+      event.dataTransfer.setData("text/plain", draggedNote);
+      removeNoteFromList(draggedNote, parentList);
+    }
+
+    function dragOverHandler(event) {
+      event.preventDefault();       
+      event.dataTransfer.dropEffect = "move";
+    }
+
+    function dropHandler(event) {
+      event.preventDefault();
+
+      const droppedNote = event.dataTransfer.getData("text/plain");
+      const targetList = event.target.id;
+
+      addNoteToList(droppedNote, targetList);
+
+      event.target.appendChild(document.getElementById(droppedNote));
+    }
+
+    function dragEnterTrashHandler(event) {
+      event.preventDefault();
+      event.target.classList.add('trash-open');
+    }
+
+    function dragLeaveTrashHandler(event) {
+      event.preventDefault();
+      event.target.classList.remove('trash-open');
+    }
+
+    function dropTrashHandler(event) {
+      event.preventDefault();
+
+      const droppedNote = event.dataTransfer.getData("text/plain");
+      const noteElement = document.getElementById(droppedNote);
+
+      event.target.classList.remove('trash-open');
+
+      noteElement.remove();
+    }
+
+    // Generates a 6 digit hex string for note identification purposes
+    function generateNewId() {
+      let output = '';
+      for (let i = 0; i < 6; ++i) {
+        output += (Math.floor(Math.random() * 16)).toString(16);
+      }
+      return output;
+    }
+
+    function addNoteToList(noteId, listId) {
+      const currentListContent = localStorage.getItem(listId);
+
+      if (currentListContent === null) {
+        localStorage.setItem(listId, noteId);
+      } else {
+        localStorage.setItem(listId, currentListContent + ';' + noteId);
+      }
+    }
+
+    function removeNoteFromList(noteId, listId) {
+      const currentListContent = localStorage.getItem(listId);
+
+      let notesInList = currentListContent.split(";");
+
+      notesInList = notesInList.filter(item => item !== noteId)
+
+      if (notesInList.length !== 0) {
+        localStorage.setItem(listId, notesInList.join(';'));
+      } else {
+        localStorage.removeItem(listId);
+      }
+    }
+
+    function createNote(listId, noteId = null) {
+      // Create the note element
+      const newNote = document.createElement("textarea");
+
+      // Set the attributes all notes need
+      newNote.spellcheck = "false";
+      newNote.draggable = "true";
+
+      // If this is an existing note, retrieve the id and content and set it
+      if (noteId !== null) {
+        newNote.id = noteId;
+        newNote.value = localStorage.getItem(noteId);
+      } else {
+        // If not, generate a new id
+        newNote.id = generateNewId();
+        newNote.value = '';
+      }
+
+      // Add the update & drag event listeners
+      newNote.addEventListener("input", event => {
+        localStorage.setItem(newNote.id, newNote.value);
+      });
+
+      newNote.addEventListener("dragstart", dragStartHandler);
+
+      // Add the note to the list
+      const parentList = document.getElementById(listId);
+      parentList.appendChild(newNote);
+
+      return newNote.id;
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      // Get our elements
+      const lists = document.querySelectorAll(".list");
+      const addButtons = document.querySelectorAll(".new");
+      const trashcan = document.querySelector('.trashcan');
+
+      // Loop the lists and restore their content
+      for (const list of lists) {
+        const listId = list.id;
+
+        const listContent = localStorage.getItem(listId);
+
+        if (listContent !== null) {
+          const notesInList = listContent.split(";");
+
+          for (const noteInList of notesInList) {
+            createNote(listId, noteInList)
+          }
+        }
+
+        // Make lists valid drop targets for notes
+        list.addEventListener("dragover", dragOverHandler);
+        list.addEventListener("drop", dropHandler);
+      }
+
+      // Bind the "add new note" buttons
+      for (const addButton of addButtons) {
+        addButton.addEventListener("click", event => {
+          const parentListId = event.target.parentNode.parentNode.id;
+          const newNote = createNote(parentListId);
+          addNoteToList(newNote, parentListId);
+        });
+      }
+
+      // Set up the trashcan events
+      trashcan.addEventListener("dragover", dragOverHandler);
+      trashcan.addEventListener("dragenter", dragEnterTrashHandler);
+      trashcan.addEventListener("dragleave", dragLeaveTrashHandler);
+      trashcan.addEventListener("drop", dropTrashHandler);
+    });
+  </script>
+</head>
+<body>
+  <main class="board">
+    <section class="list" id="to-do">
+      <header>
+        <button class="new">+</button>
+        <h2>To do</h2>
+      </header>
+    </section>
+    <section class="list" id="progress">
+      <header>
+        <button class="new">+</button>
+        <h2>In progress</h2>
+      </header>
+    </section>
+    <section class="list" id="review">
+      <header>
+        <button class="new">+</button>
+        <h2>In review</h2>
+      </header>
+    </section>
+    <section class="list" id="approved">
+      <header>
+        <button class="new">+</button>
+        <h2>Approved</h2>
+      </header>
+    </section>
+    <section class="list" id="done">
+      <header>
+        <button class="new">+</button>
+        <h2>Done</h2>
+      </header>
+    </section>
+  </main>
+  <aside class="trashcan"></aside>
+</body>
+</html>
