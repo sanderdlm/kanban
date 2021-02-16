@@ -17,6 +17,7 @@
       --mercury: #e8e8e8;
       --bright-sun: #FEDC32;
       --hot-cinnamon: #DE5825;
+      --blue-ribbon: #3254fe;
       --concrete: #fafafa;
 
       --color-text: var(--mine-shaft);
@@ -54,6 +55,8 @@
       display: flex;
       padding: .5rem;
       margin-bottom: 1rem;
+      position: sticky;
+      top: 0;
     }
 
     section header h2 {
@@ -81,6 +84,7 @@
       overflow: hidden;
       transition: 100ms;
       margin: 0 .5rem;
+      min-height: 4rem;
     }
 
     textarea + textarea {
@@ -88,7 +92,7 @@
     }
 
     textarea:focus {
-      outline: solid 3px var(--color-text);
+      outline: solid 2px var(--blue-ribbon);
     }
 
     textarea:hover {
